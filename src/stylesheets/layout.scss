@@ -1,0 +1,125 @@
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  display: grid;
+  grid-template-columns: minmax(300px, auto) 1fr;
+  place-content: stretch;
+  align-items: center;
+  height: 100%;
+  // padding: 10px;
+  box-sizing: border-box;
+
+
+  color: var(--text-color);
+  background: var(--background-val);
+
+  div.home {
+    height: 100%;
+    display: grid;
+    place-content: center stretch;
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 1rem;
+  }
+}
+
+body {
+  height: 100vh;
+  height: 100dvh;
+  height: 100svh;
+  margin: 0;
+  background: var(--background-val);
+  font-size: 10px;
+
+}
+
+div.sidebar {
+  // padding-inline: 10px;
+  padding-block: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--sidebar-background-val);
+  color: var(--sidebar-text-col-val);
+  height: 100%;
+  text-align: left;
+  box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+  font-size: 1.3rem;
+
+  h1,
+  h2 {
+    // text-align: left;
+    padding-inline: 10px;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+  }
+
+}
+
+nav {
+  display: grid;
+  grid-template-rows: 1fr 1fr auto;
+  place-content: center stretch;
+  gap: 5px;
+  width: 100%;
+  // padding: 30px;
+  padding-inline: 10px;
+  box-sizing: border-box;
+
+
+  a {
+    width: 100%;
+    text-align: left;
+    min-height: 40px;
+    display: grid;
+    place-content: center left;
+    border-radius: 5px;
+    padding: 5px;
+    margin-right: 10px;
+    box-sizing: border-box;
+    text-decoration: none;
+    transition: background-color 0.3s 0.05s;
+
+    &:hover {
+      background: #f7f7f755;
+      color: #303030;
+    }
+
+    // &.router-link-exact-active {
+    //   color: #42b983;
+    // }
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  #app {
+    grid-template-columns: auto;
+    grid-template-rows: 1fr 2fr;
+
+    div.home {
+      overflow: scroll;
+      padding: 15px 8px;
+
+      span.no-of-tasks {
+        font-size: 2.8rem;
+      }
+    }
+  }
+
+  div.sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    background: none;
+    box-shadow: none;
+    gap: 10px;
+    h1, h2 {
+      margin: 0;
+    }
+    nav {
+      display: none;
+    }
+  }
+}
