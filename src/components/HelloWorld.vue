@@ -42,9 +42,32 @@
 </template>
 
 <script>
+import { ref, onMounted } from 'vue';
+import { convert } from 'ical2json';
 import { storageManager } from '@/composables/storage';
 import { useGetFutureAndPastEvents } from '@/composables/useGetFutureAndPastEvents';
+
+
 export default {
+  setup() {
+    const json = ref(false);
+    let jsonData = ref({});
+    const firstThreeDatesArray = ref([]);
+    const { storage } = storageManager();
+    const {
+      getFutureEvents,
+      getPastEvents,
+      getTodaysEvents,
+      convertToISO8601,
+      getTime,
+      getYear,
+      getDayOfWeek,
+      getMonth,
+      getEventLength,
+      getNextThreeHours,
+      getDayOfMonth,
+    } = useGetFutureAndPastEvents();
+
     if (storage.doesDataExist('calendarJson')) {
       jsonData.value = storage.getData('calendarJson');
       json.value = storage.getData('calendarJson');
@@ -84,6 +107,22 @@ export default {
       };
 
       reader.readAsText(file);
+    };
+
+    return {
+      json, handleFileUpload, jsonData,
+      getFutureEvents,
+      getPastEvents,
+      getTodaysEvents,
+      convertToISO8601,
+      getTime,
+      getYear,
+      getMonth,
+      getDayOfWeek,
+      getEventLength,
+      firstThreeDatesArray,
+      getNextThreeHours,
+      getDayOfMonth,
     };
   },
 };
@@ -228,7 +267,7 @@ export default {
       color: var(--text-color);
 
 
-h3 {
+      h3 {
         grid-column: span 2;
         margin: 0;
 
@@ -354,9 +393,9 @@ h3 {
           // color: 3331;
 
         }
-}
-}
-}
+      }
+    }
+  }
 
 }
 </style>
