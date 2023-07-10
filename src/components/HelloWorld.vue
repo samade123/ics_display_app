@@ -3,6 +3,40 @@
     <input ref="input" v-if="!json" type="file" accept=".ics" @change="handleFileUpload" />
     <div class='event-group' v-if="json">
 
+      <div class="event-summary"><span class="no-of-tasks">48</span><span>Tasks done</span></div>
+      <div class="event-summary">Next event is</div>
+      <div class="event-summary">Last event was</div>
+      <div class="event-summary"><span class="no-of-tasks">12</span><span>Future Events</span></div>
+      <div class="event-summary today">
+        <div class="date">
+          <span>{{ getDayOfMonth() }} DEC</span>
+          <h3>{{ getDayOfWeek(new Date()) }}</h3>
+        </div>
+        <div v-for="hour in getNextThreeHours()" class="event-slot" :key="hour">
+          <h4>
+            {{ getTime(hour) }}
+          </h4>
+        </div>
+      </div>
+
+      <div class="event" v-for='calendar in  firstThreeDatesArray' :key="calendar['CREATED']">
+        <!-- {{ calendar['NEWCREATED'] }} -->
+        <h3>{{ calendar['SUMMARY'] }}</h3>
+        <div class="icon"></div>
+        <div class="time">
+          {{ getTime(new Date(calendar['NEWDTSTART'])) }}
+          <span>start</span>
+        </div>
+        <div class="length" v-if="calendar.length > 0"> {{ getEventLength(calendar) }}</div>
+        <div class="time end">
+          {{ getTime(new Date(calendar['NEWDTEND'])) }}
+          <span>end</span>
+
+        </div>
+      </div>
+      <div class="event-summary next-day">Events tomorrow</div>
+      <div class="event-summary second-next-day">Events day after tomorrow</div>
+
     </div>
   </div>
 </template>
