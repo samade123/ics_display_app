@@ -9,6 +9,7 @@
         "src/*"
       ]
     },
+    "vue.inlayHints.optionsWrapper": "false",
     "lib": [
       "esnext",
       "dom",
