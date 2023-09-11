@@ -1,24 +1,3 @@
-<!-- <template>
-  <div class="sidebar">
-    <h1>You have 12 tasks today</h1>
-    <h2 class="">{{Date.now()}}</h2>
-    <nav>
-      <router-link to="/">Home</router-link>
-      <router-link to="/about">About</router-link>
-    </nav>
-  </div>
-  <router-view />
-</template>
-
-<style lang="scss">
-
-@use "@/stylesheets/variables.scss"as *;
-@use "@/stylesheets/layout.scss"as *;
-
-
-</style> -->
-
-
 <template>
   <div class="sidebar">
     <h1>You have 12 tasks today</h1>
@@ -27,6 +6,11 @@
       <router-link v-for="route in routes" :key="route.path" :to="route.path">{{ route.name }}</router-link>
     </nav>
   </div>
+
+  <nav class="topbar">
+    <input type="checkbox" id="vehicle1" name="vehicle1" value="Bike">
+    <label for="vehicle1"> Summary</label>
+  </nav>
   <router-view />
 </template>
 

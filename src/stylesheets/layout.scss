@@ -14,14 +14,16 @@
 
   color: var(--text-color);
   background: var(--background-val);
+  grid-template-rows: 1fr auto 1fr;
 
   div.home {
     height: 100%;
     display: grid;
     place-content: center stretch;
-    padding: 15px;
+    padding: 10px 15px;
     box-sizing: border-box;
     font-size: 1rem;
+    grid-column: 2;
   }
 }
 
@@ -46,6 +48,7 @@ div.sidebar {
   text-align: left;
   box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
   font-size: 1.3rem;
+  grid-row: span 3;
 
   h1,
   h2 {
@@ -56,6 +59,16 @@ div.sidebar {
     box-sizing: border-box;
   }
 
+}
+
+nav.topbar{
+  display: flex;
+  text-align: left;
+  grid-column: 2;
+  align-items: end;
+  height: 100%;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 nav {
