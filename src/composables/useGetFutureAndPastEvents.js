@@ -79,23 +79,58 @@ export function useGetFutureAndPastEvents() {
   };
 
 
-  const getLastEvent = (jsonObject) => {
-    const events = jsonObject.VCALENDAR[0].VEVENT;
-
+  const getLastEvent = (jsonObject, pastEvent) => {
+    let events = jsonObject.VCALENDAR[0].VEVENT;
+    
     if (events.length === 0) {
       return null; // Return null if there are no events
     }
-
-    const lastEvent = events[events.length - 1];
-    const startDate = convertToISO8601(lastEvent.DTSTART);
+    
+    let lastEvent = events[events.length - 1];
+    if (pastEvent && pastEvent.length > 0) {
+      lastEvent = pastEvent[0];
+    }
+    
+    
+    const startDateAKey = Object.keys(lastEvent).find((key) => key.includes("DTSTART"));
+    console.log(lastEvent, "last event", startDateAKey)
+    const startDate = convertToISO8601(lastEvent[startDateAKey]);
     const date = new Date(startDate);
     const eventDay = getDayOfWeek(date);
     const eventTime = getTime(date);
 
     return {
-      eventName: lastEvent.name,
+      eventName: lastEvent.SUMMARY,
       eventDay,
       date: date.toDateString(),
+      month: getMonth(date.getMonth()),
+      dateDate: date.getDate(),
+      time: eventTime,
+    };
+  };
+
+  const getFirstEvent = (futureEvents) => {
+    
+    
+    // let firstEvent = events[events.length - 1];
+    // if (futureEvents && futureEvents.length > 0) {
+     let firstEvent = futureEvents[0];
+    // }
+    
+    
+    const startDateAKey = Object.keys(firstEvent).find((key) => key.includes("DTSTART"));
+    console.log(firstEvent, "first event", startDateAKey)
+    const startDate = convertToISO8601(firstEvent[startDateAKey]);
+    const date = new Date(startDate);
+    const eventDay = getDayOfWeek(date);
+    const eventTime = getTime(date);
+
+    return {
+      eventName: firstEvent.SUMMARY,
+      eventDay,
+      date: date.toDateString(),
+      month: getMonth(date.getMonth()),
+      dateDate: date.getDate(),
       time: eventTime,
     };
   };
@@ -161,11 +196,29 @@ export function useGetFutureAndPastEvents() {
     return time;
   }
 
+  function getDay(date) {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+
+    const time = `${padZero(hours)}:${padZero(minutes)}`;
+    // const time = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+    return time;
+  }
+
   function getYear(date) {
     return date.getFullYear();
   }
 
-  function getMonth(date) {
+  function getMonthAndDay(date) {
+    const month = date.getMonth() + 1; // JavaScript months are 0-based, so add 1
+    const day = date.getDate();
+  
+    return `${getMonth(month)} ${day}`;
+  }
+
+  function getMonth(month) {
+   let date = new Date();
     const months = [
       'January',
       'February',
@@ -181,7 +234,7 @@ export function useGetFutureAndPastEvents() {
       'December'
     ];
 
-    const monthIndex = date.getMonth();
+    const monthIndex = month ? month : date.getMonth();
     return months[monthIndex];
   }
 
@@ -236,6 +289,7 @@ export function useGetFutureAndPastEvents() {
     getFutureEvents,
     getPastEvents,
     getTodaysEvents,
+    getFirstEvent,
     convertToISO8601,
     getTime,
     getYear,
@@ -246,5 +300,6 @@ export function useGetFutureAndPastEvents() {
     getDayOfMonth,
     getLastEvent,
     getNextEvent,
+    getMonthAndDay,
   };
 }

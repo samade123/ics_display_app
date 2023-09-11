@@ -1,15 +1,39 @@
 <template>
+  
   <div style="overflow: scroll">
     <input ref="input" v-if="!json" type="file" accept=".ics" @change="handleFileUpload" />
     <div class='event-group' v-if="json">
 
-      <div class="event-summary"><span class="no-of-tasks">48</span><span>Tasks done</span></div>
-      <div class="event-summary">Next event is</div>
-      <div class="event-summary">Last event was</div>
-      <div class="event-summary"><span class="no-of-tasks">12</span><span>Future Events</span></div>
+      <div class="event-summary">
+        <h5 class="no-of-tasks">{{ pastEvents.length }}
+          <span class="small-text">Tasks done</span>
+        </h5>
+      </div>
+      <div class="event-summary next">
+        <h3>Future Event(s)/Task(s)</h3>
+        <h5 class="date header-day" v-if="firstEvent">{{ firstEvent.dateDate }}
+          <span class="small-text">{{ firstEvent.month }}</span>
+        </h5>
+        <h4 v-if="firstEvent">{{ firstEvent.eventName }}</h4>
+
+      </div>
+      <div class="event-summary last">
+        <h3>Your last Event/Task</h3>
+        <h5 class="date header-day" v-if="lastEvent">{{ lastEvent.dateDate }}
+          <span class="small-text">{{ lastEvent.month }}</span>
+        </h5>
+        <h4 v-if="lastEvent">{{ lastEvent.eventName }}</h4>
+
+      </div>
+
+      <div class="event-summary">
+        <h5 class="no-of-tasks">{{ futureEvents.length }}
+          <span class="small-text">Future Events</span>
+        </h5>
+      </div>
       <div class="event-summary today">
         <div class="date">
-          <span>{{ getDayOfMonth() }} DEC</span>
+          <span>{{ getDayOfMonth() }} {{ getMonth() }}</span>
           <h3>{{ getDayOfWeek(new Date()) }}</h3>
         </div>
         <div v-for="hour in getNextThreeHours()" class="event-slot" :key="hour">
@@ -23,6 +47,7 @@
         <!-- {{ calendar['NEWCREATED'] }} -->
         <h3>{{ calendar['SUMMARY'] }}</h3>
         <div class="icon"></div>
+        <h4>{{ getMonthAndDay(new Date(calendar['NEWDTSTART'])) }}</h4>
         <div class="time">
           {{ getTime(new Date(calendar['NEWDTSTART'])) }}
           <span>start</span>
@@ -34,8 +59,8 @@
 
         </div>
       </div>
-      <div class="event-summary next-day">Events tomorrow</div>
-      <div class="event-summary second-next-day">Events day after tomorrow</div>
+      <!-- <div class="event-summary next-day">Events tomorrow</div> -->
+      <!-- <div class="event-summary second-next-day">Events day after tomorrow</div> -->
 
     </div>
   </div>
@@ -51,6 +76,13 @@ import { useGetFutureAndPastEvents } from '@/composables/useGetFutureAndPastEven
 export default {
   setup() {
     const json = ref(false);
+    const futureEvents = ref(false);
+    const pastEvents = ref(false);
+    const lastEvent = ref(false);
+    const firstEvent = ref(false);
+
+
+
     let jsonData = ref({});
     const firstThreeDatesArray = ref([]);
     const { storage } = storageManager();
@@ -61,20 +93,30 @@ export default {
       convertToISO8601,
       getTime,
       getYear,
-      getDayOfWeek,
       getMonth,
+      getDayOfWeek,
       getEventLength,
       getNextThreeHours,
       getDayOfMonth,
+      getLastEvent,
+      getNextEvent,
+      getMonthAndDay,
+      getFirstEvent,
     } = useGetFutureAndPastEvents();
 
     if (storage.doesDataExist('calendarJson')) {
       jsonData.value = storage.getData('calendarJson');
       json.value = storage.getData('calendarJson');
-      firstThreeDatesArray.value = getFutureEvents(json.value).slice(0, 3);;
+      firstThreeDatesArray.value = getFutureEvents(json.value).slice(0, 4);;
       // firstThreeDatesArray.value = jsonData.value["VCALENDAR"][0]["VEVENT"];
       // console.log("test - future", getFutureEvents(json.value))
       // console.log("test", getPastEvents(json.value))
+      futureEvents.value = getFutureEvents(json.value)
+      pastEvents.value = getPastEvents(json.value)
+      lastEvent.value = getLastEvent(json.value, pastEvents.value)
+      firstEvent.value = getFirstEvent(futureEvents.value)
+
+
 
       onMounted(() => {
 
@@ -123,6 +165,12 @@ export default {
       firstThreeDatesArray,
       getNextThreeHours,
       getDayOfMonth,
+      futureEvents,
+      pastEvents,
+      lastEvent,
+      firstEvent,
+      getMonthAndDay,
+
     };
   },
 };
@@ -176,8 +224,21 @@ export default {
     }
 
     &.event-summary {
-      h3 {
+
+      &.last, &.next {
+
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+
+        h5.date {
+          grid-row: span 2;
+        }
+      }
+
+      :is(h3, h4, h5) {
         margin: 0;
+
+
       }
 
       &.today {
@@ -248,34 +309,55 @@ export default {
       }
 
 
-      .no-of-tasks {
+      .no-of-tasks,
+      .header-day {
         font-size: 3em;
         font-weight: 700;
         color: #3339;
-        // color: 3331;
 
+        // color: 3331;
+        span.small-text {
+          font-size: 0.4em;
+          display: block;
+          font-weight: 500;
+        }
       }
 
 
     }
 
     &.event {
-      grid-template-rows: 1fr auto;
+      grid-template-rows: auto auto 1fr;
       grid-template-columns: 1fr 2fr 1fr;
       place-items: start;
       padding: 10px;
       color: var(--text-color);
 
 
-      h3 {
+      :is(h3, h5) {
         grid-column: span 2;
         margin: 0;
 
+        overflow: hidden;
+        max-width: 100%;
+        text-overflow: ellipsis;
+        width: fit-content;
+        white-space: nowrap;
       }
+
+      h4 {
+        grid-column: span 3;
+        margin: 0;
+        place-self: start;
+        opacity: 0.8;
+      }
+
+
+
 
       .icon {
         grid-column: span 1;
-        background: black;
+        background: #0000;
         border-radius: 50%;
         // height: 30%;
         width: 20%;
@@ -295,6 +377,9 @@ export default {
 
         font-size: 1.25rem;
 
+        place-self: end;
+
+
         span {
           font-size: 1rem;
           text-transform: capitalize;
@@ -306,9 +391,9 @@ export default {
         }
       }
 
-      .time.end {
-        place-self: end;
-      }
+      // .time.end {
+      //   // place-self: start end;
+      // }
 
       .length {
         background: var(--text-color);
