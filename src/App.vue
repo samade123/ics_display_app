@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar">
     <h1>You have 12 tasks today</h1>
-    <h2 class="">{{ Date.now() }}</h2>
+    <h2 class="">{{ today }}</h2>
     <nav>
       <router-link v-for="route in routes" :key="route.path" :to="route.path">{{ route.name }}</router-link>
     </nav>
@@ -17,6 +17,8 @@
 <script>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { format } from 'date-fns'
+
 
 export default {
   setup() {
@@ -25,8 +27,11 @@ export default {
     const routes = computed(() => {
       return router.getRoutes();
     });
+    const today = format(new Date(), 'MM/dd/yyyy')
+
     return {
       routes,
+      today,
     };
   },
 };
