@@ -1,4 +1,6 @@
 import { ref } from 'vue';
+import { compareDesc, isFuture, parse } from 'date-fns'
+
 
 export function useGetFutureAndPastEvents() {
   const convertToISO8601 = (dateTimeString) => {
@@ -9,35 +11,68 @@ export function useGetFutureAndPastEvents() {
       const hours = dateTimeString.slice(9, 11) || '00';
       const minutes = dateTimeString.slice(11, 13) || '00';
       const seconds = dateTimeString.slice(13, 15) || '00';
-  
+
       const iso8601String = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
       return iso8601String;
     } else {
       const year = dateTimeString.slice(0, 4);
       const month = dateTimeString.slice(4, 6);
       const day = dateTimeString.slice(6, 8);
-  
+
       const iso8601String = `${year}-${month}-${day}T00:00:00Z`;
       return iso8601String;
     }
   };
-  
+
+  const sortByDateDesc = (a, b) => {
+    return compareDesc(a.date, b.date);
+  }
+
+  const getAllEvents = (jsonObject) => {
+    const allEvents = ref([]);
+
+    // console.log("allevents" , jsonObject);
+
+
+    const events = jsonObject.VCALENDAR[0].VEVENT;
+
+    for (const event of events) {
+      const dtStartKey = Object.keys(event).find((key) => key.includes("DTSTART"));
+      const startDate = convertToISO8601(event[dtStartKey]);
+
+      allEvents.value.push(event);
+    }
+
+    allEvents.value.sort((a, b) => {
+      const startDateAKey = Object.keys(a).find((key) => key.includes("DTSTART"));
+      const startDateBKey = Object.keys(b).find((key) => key.includes("DTSTART"));
+      const startDateA = convertToISO8601(a[startDateAKey]);
+      const startDateB = convertToISO8601(b[startDateBKey]);
+      return compareDesc(new Date(startDateA), new Date(startDateB));
+    });
+    // console.log("allevents" , allEvents.value);
+
+    return allEvents.value;
+
+
+  }
+
 
   const getFutureEvents = (jsonObject) => {
     const futureEvents = ref([]);
-  
+
     const events = jsonObject.VCALENDAR[0].VEVENT;
-  
+
     for (const event of events) {
       const dtStartKey = Object.keys(event).find((key) => key.includes("DTSTART"));
       const startDate = convertToISO8601(event[dtStartKey]);
       // console.log(event[dtStartKey], startDate)
-  
+
       if (new Date(startDate) > new Date()) {
         futureEvents.value.push(event);
       }
     }
-  
+
     futureEvents.value.sort((a, b) => {
       const startDateAKey = Object.keys(a).find((key) => key.includes("DTSTART"));
       const startDateBKey = Object.keys(b).find((key) => key.includes("DTSTART"));
@@ -46,11 +81,11 @@ export function useGetFutureAndPastEvents() {
       return new Date(startDateA) - new Date(startDateB);
     });
 
-    console.log(futureEvents)
-  
+    // console.log(futureEvents)
+
     return futureEvents.value;
   };
-  
+
 
   const getPastEvents = (jsonObject) => {
     const pastEvents = ref([]);
@@ -81,19 +116,19 @@ export function useGetFutureAndPastEvents() {
 
   const getLastEvent = (jsonObject, pastEvent) => {
     let events = jsonObject.VCALENDAR[0].VEVENT;
-    
+
     if (events.length === 0) {
       return null; // Return null if there are no events
     }
-    
+
     let lastEvent = events[events.length - 1];
     if (pastEvent && pastEvent.length > 0) {
       lastEvent = pastEvent[0];
     }
-    
-    
+
+
     const startDateAKey = Object.keys(lastEvent).find((key) => key.includes("DTSTART"));
-    console.log(lastEvent, "last event", startDateAKey)
+    // console.log(lastEvent, "last event", startDateAKey)
     const startDate = convertToISO8601(lastEvent[startDateAKey]);
     const date = new Date(startDate);
     const eventDay = getDayOfWeek(date);
@@ -110,16 +145,16 @@ export function useGetFutureAndPastEvents() {
   };
 
   const getFirstEvent = (futureEvents) => {
-    
-    
+
+
     // let firstEvent = events[events.length - 1];
     // if (futureEvents && futureEvents.length > 0) {
-     let firstEvent = futureEvents[0];
+    let firstEvent = futureEvents[0];
     // }
-    
-    
+
+
     const startDateAKey = Object.keys(firstEvent).find((key) => key.includes("DTSTART"));
-    console.log(firstEvent, "first event", startDateAKey)
+    // console.log(firstEvent, "first event", startDateAKey)
     const startDate = convertToISO8601(firstEvent[startDateAKey]);
     const date = new Date(startDate);
     const eventDay = getDayOfWeek(date);
@@ -181,7 +216,7 @@ export function useGetFutureAndPastEvents() {
       const hour = new Date(startHour + i * (1000 * 60 * 60));
       nextThreeHours.push(hour);
     }
-    console.log(nextThreeHours)
+    // console.log(nextThreeHours)
 
     return nextThreeHours;
   };
@@ -213,12 +248,12 @@ export function useGetFutureAndPastEvents() {
   function getMonthAndDay(date) {
     const month = date.getMonth() + 1; // JavaScript months are 0-based, so add 1
     const day = date.getDate();
-  
+
     return `${getMonth(month)} ${day}`;
   }
 
   function getMonth(month) {
-   let date = new Date();
+    let date = new Date();
     const months = [
       'January',
       'February',
@@ -301,5 +336,6 @@ export function useGetFutureAndPastEvents() {
     getLastEvent,
     getNextEvent,
     getMonthAndDay,
+    getAllEvents,
   };
 }
